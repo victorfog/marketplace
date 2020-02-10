@@ -4,7 +4,7 @@ pragma solidity ^0.4.0;
 contract MarketPlace {
     constructor() public {}
 
-    struct sFile {
+    struct sFile { //структура  используется в dbFiles
         string Name;
         bytes32 Hash;
         bytes32 SwarmHash;
@@ -16,7 +16,7 @@ contract MarketPlace {
 
     }
 
-    enum statusDisput {empty,exist,close}
+    enum statusDisput {empty,exist,close} //собственный тип данных для отслеживания диспутов (ExistDisput)
 
     struct oneOrder {// планируется для отслеживания подтверждения, что все получили чего хотели.
         //uint OrderID;
@@ -26,7 +26,7 @@ contract MarketPlace {
         bool BayerApprove; // согласие завершение сделки со стороны покупателя
         uint FixPrise; // стоимость для фиксирования цены
         bool IsPayed;
-        statusDisput ExistDisput;
+        statusDisput ExistDisput; // enum statusDisput {empty,exist,close}
 
     }
 
@@ -35,7 +35,7 @@ contract MarketPlace {
         // uint ID;
         uint DisputCount;
         uint Rating;
-        uint Deposit; ///всю инфу хранитьтут мапинг по адресу на все данные арбитра
+        uint Deposit; ///всю инфу хранить тут мапинг по адресу на все данные арбитра
         bool Exist;
         //
     }
@@ -67,13 +67,13 @@ contract MarketPlace {
         uint arbitrVoteCount;
 
     }
-    //mapping(address=>uint[]) arbitrationDisputs; // не уверен что эир мне надо
+    //mapping(address=>uint[]) arbitrationDisputs; // не уверен что это мне надо
 
     event NewFile(string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price,
         string _Description, uint _FileID, uint _SellerID, address _owner);
 
     //  mapping(address => sFile[]) dbFile;
-    sFile[] dbFiles;
+    sFile[] dbFiles; //массив структур файлов
     mapping(address => uint[]) sellerFileIDs;
     //mapping(uint => arbitrator[]) arbitratorDB; //ID арбитра на структуру с всеми данными по нему
     // address[] arbitratorID; //массив адресов арбитров номер - адрес
@@ -82,7 +82,7 @@ contract MarketPlace {
     oneOrder[] allOrders;
     arbitrator[] allArbitrator; //арбитры оставить в массиве !! на это есть основани например если !!! вдруг захочеш по ним пройтись циклом или кто другой
                                 //не трогать длинный камент )) далой длинну строки доса 80 символов не придел ))
-    mapping(address => uint) arbitr_to_id; //чисто для записи id апбитров
+    mapping(address => uint) arbitr_to_id; //чисто для записи id арбитров
 
     mapping(uint => address) ownerOrdersID;
     mapping(uint => address) bayersOrdersID;
@@ -96,13 +96,14 @@ contract MarketPlace {
 
     //mapping //идея заключается в сохранении номерСпора=>адбитры
 
+    address[] allVendorsAtTheCurrentMoment; // для проверки: есть ли такой продавец, список продавцов
 
-    address[] allVendorsAtTheCurrentMoment; // для проверки: есть ли такой продавец
+
     // todo при создании файла нужно внести депозит
     function addFile(string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string _Description) public {
-        uint _fileCount = sellerFileIDs[msg.sender].length;
+        uint _fileCount = sellerFileIDs[msg.sender].length; //узнаем количество файлов по адресу владельца  ( мапа по ключу (адрес продавца))
         uint _SellerID;
-        if (_fileCount == 0) {
+        if (_fileCount == 0) { // проверка если у продавца количество файлов 0 -> то записываем его как нового продавца
             _SellerID = allVendorsAtTheCurrentMoment.push(msg.sender);
         } else {
             uint[] memory sellerFilesIDs = sellerFileIDs[msg.sender];
@@ -285,8 +286,6 @@ contract MarketPlace {
 
     }
 
-
-
     // a arbitr voting commit stage
 // fixme голосование ____ отметка все что ниже надо редактировать
 // fixme
@@ -350,7 +349,19 @@ contract MarketPlace {
         return keccak256(abi.encodePacked(_orderID, _voteTo, _word));
     }
 
+    function getProducts(address _owner) public view returns(string ,uint){
+        require(sellerFileIDs[_owner].length > 0);
+        uint _numbersOfFiles = sellerFileIDs[_owner].length;
+        return("This return forn method getProducts ", _numbersOfFiles);
 
+    }
 
+    function getUsers() public view returns(uint256[]){
+        uint256[] storage _allOwners;
+        for (uint i=0; i < allVendorsAtTheCurrentMoment.length; i++){
+            _allOwners.push(uint256(allVendorsAtTheCurrentMoment[i]));
+        }
+        return (_allOwners);
+    }
 
 }

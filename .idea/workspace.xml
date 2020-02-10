@@ -3,9 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="76bb7bab-5ea9-464d-be10-06e8b02d6057" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/contracts/MarketPlace.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/MarketPlace.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/MarketPlase.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/MarketPlase.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,9 +19,10 @@
   </component>
   <component name="GOROOT" path="/usr/local/go" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1XCXkjP7jI98uoCOkcQ9Mgfzh4Z" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -32,6 +35,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -49,9 +53,21 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="440" y="170" key="#Inspections" timestamp="1580929001450">
+      <screen x="0" y="23" width="1680" height="963" />
+    </state>
+    <state x="440" y="170" key="#Inspections/0.23.1680.963@0.23.1680.963" timestamp="1580929001450" />
     <state x="528" y="240" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1580806370414">
       <screen x="0" y="23" width="1680" height="965" />
     </state>
     <state x="528" y="240" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.1680.965@0.23.1680.965" timestamp="1580806370414" />
+    <state x="100" y="123" width="1480" height="763" key="DiffContextDialog" timestamp="1580925470519">
+      <screen x="0" y="23" width="1680" height="963" />
+    </state>
+    <state x="100" y="123" width="1480" height="763" key="DiffContextDialog/0.23.1680.963@0.23.1680.963" timestamp="1580925470519" />
+    <state x="341" y="143" key="SettingsEditor" timestamp="1580927224420">
+      <screen x="0" y="23" width="1680" height="963" />
+    </state>
+    <state x="341" y="143" key="SettingsEditor/0.23.1680.963@0.23.1680.963" timestamp="1580927224420" />
   </component>
 </project>

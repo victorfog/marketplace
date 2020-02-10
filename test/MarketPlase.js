@@ -431,15 +431,16 @@ contract('MarketPlace', function(accounts) {
 
 // added after 03.02.2020
 
-   /* it('getProducts (userAddress)', async function(){
+   it('getProducts (userAddress)', async function(){
         const MarketContract = await MarketPlace.new({from: accounts[0]});
         let updatedOrdersList = await initOrders(MarketContract);
-        //let i;
-        //for (i=0, )
+        //MarketContract.getProducts(0)
+
         await sleep(100);
-        console.log("!!!!!!!!!!! MarketPlace.dbFiles = ",MarketContract.dbFiles.le);
+        //console.log("!!!!!!!!!!! MarketPlace.dbFiles = ",MarketContract.getProducts(0));
+        console.log("sellerFileIDs", MarketContract.getProducts(value: accounts[1], {from: accounts[0]}));
     });
-*/
+
 });
 
 const sleep = require('util').promisify(setTimeout);
