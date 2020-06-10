@@ -1,10 +1,13 @@
 
 // converts amount of SMR token into token-wei (smallest token units)
-export function SMR(amount) {
+function SMR(amount) {
     return web3.toWei(amount, 'ether');
 }
 
 // converts amount of SMRE token into token-wei (smallest token units)
-export function SMRE(amount) {
+function SMRE(amount) {
     return amount * 100;
 }
+
+module.exports.SMR=SMR;
+module.exports.SMRE=SMRE;

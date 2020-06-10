@@ -17,7 +17,7 @@ const promisify = func => async (...args) =>
     func(...args, (error, result) => (error ? reject(error) : accept(result)))
   );
 
-export const rpcCommand = method => async (...params) =>
+const rpcCommand = method => async (...params) =>
   (await promisify(web3.currentProvider.sendAsync)({
     jsonrpc: "2.0",
     method,
@@ -25,13 +25,23 @@ export const rpcCommand = method => async (...params) =>
     id: Date.now()
   })).result;
 
-export const evm_mine = rpcCommand("evm_mine");
-export const evm_increaseTime = rpcCommand("evm_increaseTime");
-export const evm_snapshot = rpcCommand("evm_snapshot");
-export const evm_revert = rpcCommand("evm_revert");
+const evm_mine = rpcCommand("evm_mine");
+const evm_increaseTime = rpcCommand("evm_increaseTime");
+const evm_snapshot = rpcCommand("evm_snapshot");
+const evm_revert = rpcCommand("evm_revert");
 
-export async function withRollback(func) {
+async function withRollback(func) {
     const snapshotId = await evm_snapshot();
     await func();
     await evm_revert(snapshotId);
 }
+
+module.exports.rpcCommand=rpcCommand;
+module.exports.withRollback=withRollback;
+module.exports.evm_revert=evm_revert;
+module.exports.evm_snapshot=evm_snapshot;
+
+module.exports.evm_increaseTime=evm_increaseTime;
+module.exports.evm_mine=evm_mine;
+
+module.exports.promisify=promisify;

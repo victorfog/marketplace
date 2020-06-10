@@ -1,10 +1,8 @@
-
-import {zip} from './func';
-
+const {zip} = require('./func');
 
 if (!String.prototype.format) {
   String.prototype.format = function() {
-    var args = arguments;
+    let args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) {
       return typeof args[number] != 'undefined'
         ? args[number]
@@ -28,7 +26,7 @@ Object.fromIterable = function (it) {
     for (let [key, value] of it)
         rv[key] = value;
     return rv;
-}
+};
 
 
 if (Object.fromKeysValues)
@@ -36,4 +34,7 @@ if (Object.fromKeysValues)
 
 Object.fromKeysValues = function (keysIt, valuesIt) {
     return Object.fromIterable(zip([keysIt, valuesIt]));
-}
+};
+
+module.exports.String = String;
+module.exports.Object = Object;

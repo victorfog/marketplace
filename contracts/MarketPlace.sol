@@ -1,10 +1,11 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.6.0;
+
 //pragma experimental ABIEncoderV2;
 
 contract MarketPlace {
     constructor() public {}
 
-    struct sFile { //структура  используется в dbFiles
+    struct sFile {//структура  используется в dbFiles
         string Name;
         bytes32 Hash;
         bytes32 SwarmHash;
@@ -12,16 +13,16 @@ contract MarketPlace {
         string Description;
         uint FileID;
         uint SellerID;
-        address Owner;
+        address payable Owner;
 
     }
 
-    enum statusDisput {empty,exist,close} //собственный тип данных для отслеживания диспутов (ExistDisput)
+    enum statusDisput {empty, exist, close} //собственный тип данных для отслеживания диспутов (ExistDisput)
 
     struct oneOrder {// планируется для отслеживания подтверждения, что все получили чего хотели.
         //uint OrderID;
         uint FileID;
-        address BayerAddress;
+        address payable BayerAddress;
         bool OwnerApprove; // согласие завершение сделки со стороны владельца ресурса
         bool BayerApprove; // согласие завершение сделки со стороны покупателя
         uint FixPrise; // стоимость для фиксирования цены
@@ -35,7 +36,7 @@ contract MarketPlace {
         // uint ID;
         uint DisputCount;
         uint Rating;
-        uint Deposit; ///всю инфу хранить тут мапинг по адресу на все данные арбитра
+        uint Deposit; //всю инфу хранить тут мапинг по адресу на все данные арбитра
         bool Exist;
         //
     }
@@ -46,6 +47,7 @@ contract MarketPlace {
         bytes32 codeWord;
 
     }
+
     struct voting {
         mapping(address => arbitrVote) votes; //fixme если убрать!!!!!!!!!!!!!!
         uint endVoting;
@@ -74,14 +76,14 @@ contract MarketPlace {
 
     //  mapping(address => sFile[]) dbFile;
     sFile[] dbFiles; //массив структур файлов
-    mapping(address => uint[]) sellerFileIDs;
+    mapping(address => uint[]) sellerFileIDs; //todo тут чисто число а надо что-то уникальное чтобы можно было найти
     //mapping(uint => arbitrator[]) arbitratorDB; //ID арбитра на структуру с всеми данными по нему
     // address[] arbitratorID; //массив адресов арбитров номер - адрес
     // mapping(address => uint) deposit;
 
     oneOrder[] allOrders;
     arbitrator[] allArbitrator; //арбитры оставить в массиве !! на это есть основани например если !!! вдруг захочеш по ним пройтись циклом или кто другой
-                                //не трогать длинный камент )) далой длинну строки доса 80 символов не придел ))
+    //не трогать длинный камент )) далой длинну строки доса 80 символов не придел ))
     mapping(address => uint) arbitr_to_id; //чисто для записи id арбитров
 
     mapping(uint => address) ownerOrdersID;
@@ -100,11 +102,13 @@ contract MarketPlace {
 
 
     // todo при создании файла нужно внести депозит
-    function addFile(string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string _Description) public {
-        uint _fileCount = sellerFileIDs[msg.sender].length; //узнаем количество файлов по адресу владельца  ( мапа по ключу (адрес продавца))
+    function addFile(string memory _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string memory _Description) public {
+        uint _fileCount = sellerFileIDs[msg.sender].length;
+        //узнаем количество файлов по адресу владельца  ( мапа по ключу (адрес продавца))
         uint _SellerID;
-        if (_fileCount == 0) { // проверка если у продавца количество файлов 0 -> то записываем его как нового продавца
-            _SellerID = allVendorsAtTheCurrentMoment.push(msg.sender);
+        if (_fileCount == 0) {// проверка если у продавца количество файлов 0 -> то записываем его как нового продавца
+            allVendorsAtTheCurrentMoment.push(msg.sender);
+            _SellerID = allVendorsAtTheCurrentMoment.length;
         } else {
             uint[] memory sellerFilesIDs = sellerFileIDs[msg.sender];
             uint sellerFirstFileID = sellerFilesIDs[0];
@@ -114,19 +118,30 @@ contract MarketPlace {
         uint _FileID = dbFiles.length;
         dbFiles.push(sFile(_name, _Hash, _SwarmHash, _Price, _Description, _FileID, _SellerID, msg.sender));
         sellerFileIDs[msg.sender].push(_FileID);
+        // тут есть файл id на пользователе
 
         emit NewFile(_name, _Hash, _SwarmHash, _Price, _Description, _FileID, _SellerID, msg.sender);
     }
 
-    //    function list() public view returns(sFile[]) {
-    //        sFile[] memory _allfiles;
-    //        for (uint i = 0; i < dbFiles.length; i++) {
-    //            _allfiles.push(dbFiles[i]);
-    //        }
-    //        return _allfiles;
+    //        function list() public view returns(sFile[]) {
+    //            sFile[] memory _allfiles;
+    //            for (uint i = 0; i < dbFiles.length; i++) {
+    //                _allfiles.push(dbFiles[i]);
+    //            }
+    //            return _allfiles;
     //
-    //    }
+    //        }
 
+    // расчет стоимости потребления газа
+    //    function test() returns (uint256 gasUsed)
+    //    {
+    //        uint256 startGas = gasleft();
+    //
+    //        // ...some code here...
+    //
+    //        gasUsed = startGas - gasleft();
+    //    }
+    // расчет стоимости потребления газа
 
     event EventCreateOrder(uint _FileID, uint _orderID, uint _price);
 
@@ -134,7 +149,8 @@ contract MarketPlace {
         sFile memory BayFile = dbFiles[_FileID];
         require(dbFiles.length >= _FileID, "Файл с указанным ID не существует");
         require(BayFile.Price <= msg.value, "given money should be greater than the price");
-        uint _orderID = allOrders.push(oneOrder(_FileID, msg.sender, false, false, BayFile.Price, false, statusDisput.empty)) - 1;
+        allOrders.push(oneOrder(_FileID, msg.sender, false, false, BayFile.Price, false, statusDisput.empty));
+        uint _orderID = allOrders.length - 1;
         //0- статус спора; 0-ID спора
         ownerOrdersID[_orderID];
         bayersOrdersID[_orderID];
@@ -172,9 +188,9 @@ contract MarketPlace {
         oneOrder storage _order = allOrders[_orderID];
         require(_order.ExistDisput == statusDisput.empty);
         require(_order.IsPayed == false, "the order has been already payed");
-// кучу проверок по открытию диспута
+        // кучу проверок по открытию диспута
         uint amount = _order.FixPrise;
-        address _owner = dbFiles[_order.FileID].Owner;
+        address payable _owner = dbFiles[_order.FileID].Owner;
 
         if (_order.OwnerApprove == true && _order.BayerApprove == true) {
             _order.IsPayed = true;
@@ -182,29 +198,27 @@ contract MarketPlace {
         }
     }
 
-    function searchOrder(uint _fileID) view public returns (uint) {
-        oneOrder memory _order;
-        for (uint i = 0; i < allOrders.length; i++) {
-            _order = allOrders[i];
-
-            if (msg.sender != _order.BayerAddress) {
-                continue;
-            }
-
-            if (_order.FileID == _fileID) {
-                return i;
-            }
-            // кажись так цикл не остановить ((
-
-        }
-    }
+    //    function searchOrder(uint _fileID) view public returns (oneOrder) {// todo Надо проверить вроде правильно а в тоже время и нет.
+    //        oneOrder memory _order;
+    //
+    //        for (uint i = 0; i < allOrders.length; i++) {
+    //            _order = allOrders[i];
+    //
+    //            if (msg.sender != _order.BayerAddress) {
+    //                continue;
+    //            }else{
+    //                break;
+    //            }
+    //        }
+    //        return(_order); //
+    //    }
 
     function canselOrder(uint _orderID) public {//todo создать функцию отмена заказа
         oneOrder storage _order = allOrders[_orderID];
         require(_order.OwnerApprove == false && _order.BayerApprove == false);
         require(_order.IsPayed == false, "the order has been already payed");
         require(_order.ExistDisput != statusDisput.exist);
-        address _bayerAddress = _order.BayerAddress;
+        address payable _bayerAddress = _order.BayerAddress;
         require(_bayerAddress == msg.sender);
         uint amount = _order.FixPrise;
         _order.IsPayed = true;
@@ -215,32 +229,33 @@ contract MarketPlace {
 
     uint constant minArbitorDeposit = 10;
 
-    function addDepositArbitrator() public payable { // нужен тест
+    function addDepositArbitrator() public payable {// нужен тест
         uint _ID1 = arbitratorID[msg.sender];
         require(allArbitrator[_ID1].Exist == true);
         allArbitrator[_ID1].Deposit += msg.value;
     }
 
-    function becomeANarbitrator() public payable { //нужен тетт
+    function becomeANarbitrator() public payable {//нужен тетт
         require(minArbitorDeposit <= msg.value);
         arbitratorID[msg.sender] = newArbitrator(msg.sender, msg.value);
     }
 
-    function newArbitrator(address arbitr, uint _deposit) private returns (uint) { //тужен тест
-            uint _id = allArbitrator.push(arbitrator({
+    function newArbitrator(address arbitr, uint _deposit) private returns (uint) {//тужен тест
+        allArbitrator.push(arbitrator({
             arbitratorAddress : arbitr,
             Deposit : _deposit,
             DisputCount : 0,
             Rating : 0,
             Exist : true
-            })) - 1;
-            arbitr_to_id[msg.sender] = _id;
-            return (_id);
+            }));
+        uint _id = allArbitrator.length - 1;
+        arbitr_to_id[msg.sender] = _id;
+        return (_id);
     }
 
     event createDisputEvent(uint _orderID, string _complaint, address _owner, address _bayer); //нужен тест
 
-    function createDisput(uint _orderID, string _complaint) public {
+    function createDisput(uint _orderID, string memory _complaint) public {
         oneOrder storage _order = allOrders[_orderID];
         sFile storage _fileInfo = dbFiles[_order.FileID];
         require(_order.BayerAddress == msg.sender || _fileInfo.Owner == msg.sender);
@@ -249,24 +264,24 @@ contract MarketPlace {
         address _arbitrAddress;
         string memory _emptiString;
         voting memory emptyVoting;
-      //  bytes32 _emptyHash;
+        //  bytes32 _emptyHash;
         allDisput[_orderID] = disput({
-            DateCreate: now,
-            WhoCreate: msg.sender,
-            Complaint: _complaint,
-            AnswerComplaint: _emptiString,
-            ConsentOwner: false,
-            ConsentBayer: false,
-            CallArbitr: false,
-            arbirtatorComment: _emptiString,
-            Voting: emptyVoting,
-            closedDispute_in_Favor: _arbitrAddress,
-            arbitrVoteCount: 0
+            DateCreate : now,
+            WhoCreate : msg.sender,
+            Complaint : _complaint,
+            AnswerComplaint : _emptiString,
+            ConsentOwner : false,
+            ConsentBayer : false,
+            CallArbitr : false,
+            arbirtatorComment : _emptiString,
+            Voting : emptyVoting,
+            closedDispute_in_Favor : _arbitrAddress,
+            arbitrVoteCount : 0
             });
         //todo обращаемся к базе арбитров и назначаем 3х красавцев
     }
 
-    function callArbitrator (uint _orderID, string _comments) public { //нужен тест
+    function callArbitrator(uint _orderID, string memory _comments) public {//нужен тест
         disput storage _disput = allDisput[_orderID];
         require(_disput.CallArbitr == false);
         require(_disput.DateCreate + 10 days < now);
@@ -276,25 +291,28 @@ contract MarketPlace {
 
     }
 
-    function setArbitr (uint _orderID) public returns(uint){ ///Нужен выбор арбитров
+    function setArbitr(uint _orderID) public returns (uint){//Нужен выбор арбитров //TODO Дописать Рандомайзер в выборе арбитра.
         // каким-то образом идет выбор арбитров возвращается целое число
-        uint _chose = 1; //todo: поменять на вызов рандомайзера
+        uint _chose = 1;
+        //todo: поменять на вызов рандомайзера
         address _arbitr = allArbitrator[_chose].arbitratorAddress;
         disput storage _disput = allDisput[_orderID];
         arbitrVote memory _arbitrVote;
-        _disput.Voting.votes[_arbitr] = _arbitrVote; //todo: в структцры voting надо бодавить что-то !!!!
+        _disput.Voting.votes[_arbitr] = _arbitrVote;
+        //todo: в структцры voting надо бодавить что-то !!!!
+        return (_chose);
 
     }
 
     // a arbitr voting commit stage
-// fixme голосование ____ отметка все что ниже надо редактировать
-// fixme
+    // fixme голосование ____ отметка все что ниже надо редактировать
+    // fixme
 
-            event endCommit(uint _orderID, string _textClose);// заставить подписаться !!!!!!!!
+    event endCommit(uint _orderID, string _textClose);// заставить подписаться !!!!!!!!
 
-    function votingArbitr (uint _orderID, bytes32 _hash) public  {
-        require(_disput.arbitrVoteCount < 3);
+    function votingArbitr(uint _orderID, bytes32 _hash) public {
         disput storage _disput = allDisput[_orderID];
+        require(_disput.arbitrVoteCount < 3);
         _disput.Voting.votes[msg.sender].hash = _hash;
 
         if (_disput.arbitrVoteCount < 3) {
@@ -317,31 +335,34 @@ contract MarketPlace {
         bytes32 _firstHash = _disput.Voting.votes[msg.sender].hash;
         bytes32 _secondHash = hashVote(_orderID, _voteTo, _word);
 
-        if (_firstHash != _secondHash){
-             return;
+        if (_firstHash != _secondHash) {
+            return;
         }
 
         _disput.Voting.votes[msg.sender].codeWord = _word;
 
-        if(_bayer == _voteTo){
+        if (_bayer == _voteTo) {
             _disput.Voting.toBayer++;
         }
-        if(_owner == _voteTo ){
+        if (_owner == _voteTo) {
             _disput.Voting.toOwner++;
         }
 
-        if(_disput.Voting.toBayer+_disput.Voting.toOwner == 3){
+        if (_disput.Voting.toBayer + _disput.Voting.toOwner == 3) {
             _order.ExistDisput = statusDisput.close;
 
-            closeOrderWithDisput(_orderID, _disput.Voting.toBayer>_disput.Voting.toOwner);
+            closeOrderWithDisput(_orderID, _disput.Voting.toBayer > _disput.Voting.toOwner);
         }
 
     }
 
-    function closeOrderWithDisput(uint _orderID, bool _isBuyerWins){
+    function closeOrderWithDisput(uint _orderID, bool _isBuyerWins) public view {//the compiler asked add public
         oneOrder storage _order = allOrders[_orderID];
         require(_order.ExistDisput == statusDisput.close);
 
+        if (_isBuyerWins) {
+
+        }
     }
 
 
@@ -349,19 +370,48 @@ contract MarketPlace {
         return keccak256(abi.encodePacked(_orderID, _voteTo, _word));
     }
 
-    function getProducts(address _owner) public view returns(string ,uint){
-        require(sellerFileIDs[_owner].length > 0);
-        uint _numbersOfFiles = sellerFileIDs[_owner].length;
-        return("This return forn method getProducts ", _numbersOfFiles);
 
+    event eventGetFileInfo(string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string _Description, uint _SellerID, string textConsole);
+
+    function getFileinfo(uint _fileID) public view returns (string memory, bytes32, uint, string memory, uint){
+        require(dbFiles.length >= _fileID);
+        sFile memory _sFile = dbFiles[_fileID];
+        //        string _name = _sFile.Name;
+        //        bytes32 _Hash = _sFile.Hash;
+        //        bytes32 _SwarmHash = _sFile.SwarmHash;
+        //        uint _Price = _sFile.Price;
+        //        string _Description = _sFile.Description;
+        //        uint _SellerID = _sFile.SellerID;
+        //        //address Owner;
+        //        emit GetFileInfo(_name, _Hash, _SwarmHash, _Price, _Description, _SellerID);
+        //        return(_name, _Hash, _Price, _Description, _SellerID);
+        // emit eventGetFileInfo(_sFile.Name, _sFile.Hash, _sFile.SwarmHash, _sFile.Price, _sFile.Description, _sFile.SellerID, "!!!!!!!!!!!!!!");
+        return (_sFile.Name, _sFile.Hash, _sFile.Price, _sFile.Description, _sFile.SellerID);
     }
 
-    function getUsers() public view returns(uint256[]){
-        uint256[] storage _allOwners;
-        for (uint i=0; i < allVendorsAtTheCurrentMoment.length; i++){
-            _allOwners.push(uint256(allVendorsAtTheCurrentMoment[i]));
-        }
-        return (_allOwners);
-    }
+    // event eventGetProducts (uint _fileDB, string _textConsole);
+
+
+    //string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string _Description
+    //    function getProducts(address _owner) public view returns( string){
+    //        require(sellerFileIDs[_owner].length > 0);
+    //        sFile[] memory _fileDB;
+    //        //uint _numbersOfFiles = sellerFileIDs[_owner].length;
+    //        for (uint i=0;i < sellerFileIDs[_owner].length; i++){
+    //           // _fileDB.push(sellerFileIDs[_owner]);
+    //        }
+    //        return(string _name, bytes32 _Hash, bytes32 _SwarmHash, uint _Price, string _Description);
+    //        emit eventGetProducts (_fileDB, 'да хер знает что тут ((((');
+    //
+    //    }
+
+    //    function getUsers() public view returns(uint256[]){
+    //        uint256[] storage _allOwners;
+    //        for (uint i=0; i < allVendorsAtTheCurrentMoment.length; i++){
+    //            _allOwners.push(uint256(allVendorsAtTheCurrentMoment[i]));//todo остановился тут !!!!!!!
+    //        }
+    //        return (_allOwners);
+    //    }
 
 }
+
