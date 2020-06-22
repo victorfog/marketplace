@@ -215,11 +215,12 @@ contract MarketPlace {
 
     function canselOrder(uint _orderID) public {//todo создать функцию отмена заказа
         oneOrder storage _order = allOrders[_orderID];
-        require(_order.OwnerApprove == false && _order.BayerApprove == false);
+        require(_order.OwnerApprove == false, "the order is approved by owner");
+        require(_order.BayerApprove == false, "the order is approved by buyer");
         require(_order.IsPayed == false, "the order has been already payed");
-        require(_order.ExistDisput != statusDisput.exist);
+        require(_order.ExistDisput != statusDisput.exist, "the disput is opened");
         address payable _bayerAddress = _order.BayerAddress;
-        require(_bayerAddress == msg.sender);
+        require(_bayerAddress == msg.sender, "called by not the buyer");
         uint amount = _order.FixPrise;
         _order.IsPayed = true;
         _bayerAddress.transfer(amount);
