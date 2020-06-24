@@ -153,26 +153,27 @@ contract('MarketPlace', function (accounts) {
 
         let _OrderID;
 
-        console.log("@@@", MarketContract.contract.events);
-        await MarketContract.contract.events.EventCreateOrder({}, function (error, result) {
-            if (error != null) {
-                // fixme падать
-                console.log("PANIC!!!!", error);
-            }
-
-            _OrderID = Number(result.returnValues._orderID);
-            console.log(_OrderID, `+++++++++2`);
-        });
-
-        console.log(_OrderID, `+++++++++1`);  // fixme не видно _OrderID заставить ожидать
-
         let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
 
         let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
 
         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
-
+        let currentBlock = await web3.eth.getBlock(`latest`); //get block number
         await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
+        // console.log(currentBlock, 'Block Number from search');
+
+        await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: currentBlock.number}, function (error, result) {
+
+            if (error != null) {
+                // fixme падать
+                console.log("PANIC!!!!", error);
+            }
+            if (Object.keys(result).length === 0) {
+                console.log(`result.keys a empty`);
+            }
+
+            _OrderID = Number(result[0].returnValues._orderID);
+        });
 
         await MarketContract.contract.events.eventApproveOrder()
             .on("data", (result) => {
@@ -491,7 +492,73 @@ contract('MarketPlace', function (accounts) {
         console.log("Balance after cansel order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
+        //console.log(`web3 version is `,web3.version);
+        //console.log(`Type provider`,web3.currentProvider);
     });
+// test rewrite to promise -------------------------------------------------------------------
+//     it('approveOrder-repeat section', function () {
+//         const MarketContract = await MarketPlace.new({from: accounts[4]});
+//         let updatedOrdersList = await initOrders(MarketContract);
+//
+//         let _OrderID;
+//
+//         console.log("@@@", MarketContract.contract.events);
+//         await MarketContract.contract.events.EventCreateOrder({}, function (error, result) {
+//             if (error != null) {
+//                 // fixme падать
+//                 console.log("PANIC!!!!", error);
+//             }
+//
+//             _OrderID = Number(result.returnValues._orderID);
+//             console.log(_OrderID, `+++++++++2`);
+//         });
+//
+//         console.log(_OrderID, `+++++++++1`);  // fixme не видно _OrderID заставить ожидать
+//
+//         let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
+//
+//         let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//
+//         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
+//
+//         await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
+//
+//         await MarketContract.contract.events.eventApproveOrder()
+//             .on("data", (result) => {
+//                 console.log(result.args);
+//             })
+//             .on("error", (error) => {
+//                 console.log("Panic!!!! approve", error);
+//             });
+//
+//         let beforeBalance2 = balance2;
+//         let beforeBalance5 = balance5;
+//         balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
+//         balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//
+//         let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+//
+//         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
+//         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
+//
+//         await MarketContract.approveOrder(_OrderID, true, {from: accounts[5]});
+//         await MarketContract.approveOrder(_OrderID, true, {from: accounts[2]});
+//
+//         beforeBalance2 = balance2;
+//         beforeBalance5 = balance5;
+//         balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
+//         balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//
+//
+//         contractBalance = await Number(web3.eth.getBalance(MarketContract.address));
+//
+//         console.log("Balance after close order", "bayer", balance5, "owner", balance2);
+//         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
+//         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
+//         console.log(`________________________________________________________________________`);
+//     });
+//
+
 
 // added after 03.02.2020
 
@@ -506,6 +573,8 @@ contract('MarketPlace', function (accounts) {
     //  });
 
 });
+
+
 
 const sleep = require('util').promisify(setTimeout);
 

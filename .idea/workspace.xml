@@ -4,16 +4,7 @@
     <list default="true" id="76bb7bab-5ea9-464d-be10-06e8b02d6057" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/MarketPlace.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/MarketPlace.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/babel-preset-es2015/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/babel-preset-es2015/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/regenerate/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/regenerate/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/regenerate/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/regenerate/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/regenerate/regenerate.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/regenerate/regenerate.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/MarketPlase.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/MarketPlase.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/truffle-config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/truffle.js" beforeDir="false" afterPath="$PROJECT_DIR$/truffle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -88,10 +79,10 @@
       <screen x="0" y="23" width="1680" height="965" />
     </state>
     <state width="1638" height="249" key="GridCell.Tab.0.right/0.23.1680.965@0.23.1680.965" timestamp="1583249655577" />
-    <state x="505" y="227" width="670" height="730" key="search.everywhere.popup" timestamp="1592653384102">
+    <state x="505" y="227" width="670" height="730" key="search.everywhere.popup" timestamp="1593009309563">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="505" y="227" width="670" height="730" key="search.everywhere.popup/0.0.1680.1050@0.0.1680.1050" timestamp="1592653384102" />
+    <state x="505" y="227" width="670" height="730" key="search.everywhere.popup/0.0.1680.1050@0.0.1680.1050" timestamp="1593009309563" />
     <state x="505" y="233" width="670" height="676" key="search.everywhere.popup/0.23.1680.973@0.23.1680.973" timestamp="1591806327956" />
   </component>
   <component name="XDebuggerManager">
@@ -99,19 +90,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>153</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>156</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>264</line>
+          <line>265</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="7" />
         </line-breakpoint>
