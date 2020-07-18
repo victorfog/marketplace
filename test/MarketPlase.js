@@ -124,7 +124,7 @@ contract('MarketPlace', function (accounts) {
         let updatedOrdersList = await initOrders(MarketContract);
         await expectRevert.assertion(MarketContract.createOrder(9, {
             from: accounts[4],
-            value: web3.utils.toWei('30', 'ether')
+            value: Number(web3.utils.toWei('30', 'ether'))
         }));
     });
 
@@ -155,6 +155,7 @@ contract('MarketPlace', function (accounts) {
             if (error != null) {
                 // fixme падать
                 console.log("PANIC!!!!", error);
+
             }
             if (Object.keys(result).length === 0) {
                 console.log(`result.keys a empty`);
@@ -166,67 +167,83 @@ contract('MarketPlace', function (accounts) {
     }
 
     it('approveOrder', async function () {
+        console.log(`____________________________test_approveOrder_start__________________________________________`);
         const MarketContract = await MarketPlace.new({from: accounts[4]});
         let updatedOrdersList = await initOrders(MarketContract);
 
-        let balance5 = Number(await web3.eth.getBalance(accounts[5]));
-        let balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        const buyerIndex = 5;
+        const ownerIndex = 2;
+
+        let balanceBuyer = Number(await web3.eth.getBalance(accounts[buyerIndex]));
+        let balanceOwner = Number(await web3.eth.getBalance(accounts[ownerIndex]));
         let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
+
+        console.log("*********", MarketContract.address);
 
         // Создание заказа - CreateOrder
         let currentBlock = await web3.eth.getBlock(`latest`); //get block number
-        let beforeBalance2 = balance2;
-        let beforeBalance5 = balance5;
+        let beforeBalanceOwner = balanceOwner;
+        let beforeBalanceBuyer = balanceBuyer;
         let beforeContractBalance = contractBalance;
 
-        let receipt = await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
+        let receipt = await MarketContract.createOrder(3, {from: accounts[buyerIndex], value: Number(web3.utils.toWei('14', 'ether'))});
+        // todo: check for EventCreateOrder
+        console.log("yyyyy TX createOrder", receipt);
+
         let _OrderID = await getOrderID(MarketContract, currentBlock.number);
 
         let createOrderGasSpent = await spentGasInEther(receipt); // accounts[5] потратил gas на транзакцию, в ether
 
         // Проверки балансов после CreateOrder
-        balance5 = Number(await web3.eth.getBalance(accounts[5]));
-        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        balanceBuyer = Number(await web3.eth.getBalance(accounts[buyerIndex]));
+        balanceOwner = Number(await web3.eth.getBalance(accounts[ownerIndex]));
 
-        console.log("xxxxxxxx", typeof createOrderGasSpent, typeof beforeBalance5, typeof balance5);
-        let balance5WithGas = 0 + beforeBalance5;
-        assert.isOk(balance5WithGas == beforeBalance5, `a new balance for 5th-bayer account should be less ${beforeBalance5-balance5WithGas}. gas cost ${createOrderGasSpent}`);
-        assert.isOk(balance2 == beforeBalance2, `a new balance for 2th-owner account should be the same ${balance2} ${beforeBalance2}`);
+        let balanceBuyerWithGas = createOrderGasSpent + balanceBuyer + Number(web3.utils.toWei('14', 'ether'));
+        console.log("xxxxxxxx", typeof balanceBuyerWithGas, "=", typeof createOrderGasSpent, typeof balanceBuyer, typeof web3.utils.toWei('14', 'ether'));
+        assert.isOk(balanceBuyerWithGas == beforeBalanceBuyer, `a new balance for 5th-bayer account should be less ${balanceBuyerWithGas - beforeBalanceBuyer}. gas cost ${createOrderGasSpent}`);
+        assert.isOk(balanceOwner == beforeBalanceOwner, `a new balance for 2th-owner account should be the same ${balanceOwner} ${beforeBalanceOwner}`);
         assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less' + beforeContractBalance + contractBalance);
+        assert.isOk(contractBalance != 0, 'ContractBalance should be > 0: ' + contractBalance);
 
         // Подтверждение заказа Покупателем
-        beforeBalance2 = balance2;
-        beforeBalance5 = balance5;
+        beforeBalanceOwner = balanceOwner;
+        beforeBalanceBuyer = balanceBuyer;
         beforeContractBalance = contractBalance;
 
-        await MarketContract.approveOrder(_OrderID, true, {from: accounts[5]});
+        receipt = await MarketContract.approveOrder(_OrderID, true, {from: accounts[buyerIndex]});
+        const approveOrderGasSpent = await spentGasInEther(receipt); // accounts[5] потратил gas на транзакцию, в ether
+        console.log("yyyyy TX approveOrder", approveOrderGasSpent);
 
         //--fixme-- нужно переписать обработку events на обработку типа ((await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: fromBlock}, function (error, result) {))
-        //await MarketContract.contract.getPastEvents(`eventApproveOrder`, {fromBlock: fromBlock},)
-        await MarketContract.contract.events.eventApproveOrder()//fixme !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            .on("data", (result) => {
-                console.log("cccc", result.args);
-            })
-            .on("error", (error) => {
+        await MarketContract.contract.getPastEvents(`eventApproveOrder`, {fromBlock: currentBlock.number},function (error, result) {
+            if (error != null){
                 console.log("cccc Panic!!!! approve", error);
-            });
-        assert.isOk(balance5 == beforeBalance5, 'a new balance for 5th-bayer account should be less:' +` diff Balance5 is = ${balance5-beforeBalance5}`);
-        assert.isOk(balance2 == beforeBalance2, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balance2 + ` BeforeBalance2 is = ` + beforeBalance2);
-        assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
+            }
+            if (result != null){
+                console.log(Object.keys(result[0].returnValues), `+++---`)
+            }
+        })
+        // await MarketContract.contract.events.eventApproveOrder()//fixme !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //     .on("data", (result) => {
+        //         console.log("cccc", result.args);
+        //     })
+        //     .on("error", (error) => {
+        //         console.log("cccc Panic!!!! approve", error);
+        //     });
 
         // Проверки балансов после approveOrder Покупателя
-        balance5 = Number(await web3.eth.getBalance(accounts[5]));
-        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        balanceBuyer = Number(await web3.eth.getBalance(accounts[buyerIndex]));
+        balanceOwner = Number(await web3.eth.getBalance(accounts[ownerIndex]));
 //todo balance 2
-        assert.isOk(balance5 == beforeBalance5, 'a new balance for 5th-bayer account should be less:' +` Balance5 is = `+ balance5 +` beforeBalance5 is = `+ beforeBalance5);
-        assert.isOk(balance2 == beforeBalance2, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balance2 + ` BeforeBalance2 is = ` + beforeBalance2);//todo
+        assert.isOk(balanceBuyer+approveOrderGasSpent == beforeBalanceBuyer, 'a new balance for 5th-bayer account should be less:' +` Balance5 is = `+ balanceBuyer +` beforeBalance5 is = `+ beforeBalanceBuyer + " got difference " + (beforeBalanceBuyer-balanceBuyer));
+        assert.isOk(balanceOwner == beforeBalanceOwner, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balanceOwner + ` BeforeBalance2 is = ` + beforeBalanceOwner);//todo
         assert.isOk(beforeContractBalance > contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
 
         // Подтверждение заказа Продавцом
-        beforeBalance2 = balance2;
-        beforeBalance5 = balance5;
+        beforeBalanceOwner = balanceOwner;
+        beforeBalanceBuyer = balanceBuyer;
         beforeContractBalance = contractBalance;
-        await MarketContract.approveOrder(_OrderID, true, {from: accounts[2]});
+        await MarketContract.approveOrder(_OrderID, true, {from: accounts[ownerIndex]});
         await MarketContract.contract.events.eventApproveOrder()
             .on("data", (result) => {
                 console.log(result.args);
@@ -236,15 +253,18 @@ contract('MarketPlace', function (accounts) {
             });
 
         // Проверки балансов после approveOrder Продавцом
-        balance5 = Number(await web3.eth.getBalance(accounts[5]));
-        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        balanceBuyer = Number(await web3.eth.getBalance(accounts[buyerIndex]));
+        balanceOwner = Number(await web3.eth.getBalance(accounts[ownerIndex]));
 
-        assert.isOk(balance5 < beforeBalance5, 'a new balance for 5th-bayer account should be less.' +` Balance5 is =`+ balance5 +`beforeBalance5 is =`+ beforeBalance5);
-        assert.isOk(balance2 > beforeBalance2, 'a new balance for 2th-owner account should be the same.' + ` Balance2 is =` + balance2 + ` BeforeBalance2 is =` + beforeBalance2);
+        assert.isOk(balanceBuyer < beforeBalanceBuyer, 'a new balance for 5th-bayer account should be less.' +` BalanceBuyer is =`+ balanceBuyer +`beforeBalanceBuyer is =`+ beforeBalanceBuyer);
+        assert.isOk(balanceOwner > beforeBalanceOwner, 'a new balance for 2th-owner account should be the same.' + ` BalanceOwner is =` + balanceOwner + ` BeforeBalanceOwner is =` + beforeBalanceOwner);
         assert.isOk(beforeContractBalance > contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
+        console.log(`____________________________test_approveOrder_end__________________________________________`);
     });
 
+
     it('approveOrder test to err', async function () {
+        console.log(`____________________________approveOrder_test_to_err_start__________________________________________`);
         const MarketContract = await MarketPlace.new({from: accounts[4]});
         let updatedOrdersList = await initOrders(MarketContract);
 
@@ -635,5 +655,6 @@ async function spentGasInEther(receipt) {
     const gasUsed = receipt.receipt.gasUsed;
     const tx = await web3.eth.getTransaction(receipt.tx);
     const gasPrice = tx.gasPrice;
-    return Number(gasPrice, `wei`) * gasUsed;
+    console.log("==== gas price", gasPrice, Number(gasPrice) * gasUsed);
+    return Number(gasPrice) * gasUsed;
 }

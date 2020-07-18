@@ -170,11 +170,11 @@ contract MarketPlace {
 
         if (msg.sender == _order.BayerAddress) {
             _order.BayerApprove = _approve;
-            emit eventApproveOrder(_order.OwnerApprove, _order.BayerApprove, "no transaction");
+            emit eventApproveOrder(_order.OwnerApprove, _order.BayerApprove, "no transaction - only buyer has approved");
         }
         if (msg.sender == _owner) {
             _order.OwnerApprove = _approve;
-            emit eventApproveOrder(_order.OwnerApprove, _order.BayerApprove, "no transaction");
+            emit eventApproveOrder(_order.OwnerApprove, _order.BayerApprove, "no transaction - only owner has approved");
         }
         // если она true вызвать closeOrder
         if (_order.OwnerApprove == true && _order.BayerApprove == true) {

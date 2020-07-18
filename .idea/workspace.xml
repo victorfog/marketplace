@@ -4,6 +4,7 @@
     <list default="true" id="76bb7bab-5ea9-464d-be10-06e8b02d6057" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/MarketPlace.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/MarketPlace.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/MarketPlase.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/MarketPlase.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" afterDir="false" />
     </list>
@@ -84,7 +85,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>299</line>
+          <line>319</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
