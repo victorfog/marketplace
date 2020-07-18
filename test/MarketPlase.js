@@ -1,6 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 
+//для тестов все в wei !!!!! платим в eth
 
 const {expectRevert} = require('@openzeppelin/test-helpers');
 //import {assertBigNumberEqual} from "./helpers/asserts";
@@ -147,22 +148,9 @@ contract('MarketPlace', function (accounts) {
         }));
     });
 
-    it('approveOrder', async function () {
-        const MarketContract = await MarketPlace.new({from: accounts[4]});
-        let updatedOrdersList = await initOrders(MarketContract);
-
+    async function getOrderID(MarketContract, fromBlock) {
         let _OrderID;
-
-        let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-
-        let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-
-        console.log("Balance before make order", "bayer", balance5, "owner", balance2);
-        let currentBlock = await web3.eth.getBlock(`latest`); //get block number
-        await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
-        // console.log(currentBlock, 'Block Number from search');
-
-        await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: currentBlock.number}, function (error, result) {
+        await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: fromBlock}, function (error, result) {
 
             if (error != null) {
                 // fixme падать
@@ -174,7 +162,71 @@ contract('MarketPlace', function (accounts) {
 
             _OrderID = Number(result[0].returnValues._orderID);
         });
+        return _OrderID;
+    }
 
+    it('approveOrder', async function () {
+        const MarketContract = await MarketPlace.new({from: accounts[4]});
+        let updatedOrdersList = await initOrders(MarketContract);
+
+        let balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        let balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
+
+        // Создание заказа - CreateOrder
+        let currentBlock = await web3.eth.getBlock(`latest`); //get block number
+        let beforeBalance2 = balance2;
+        let beforeBalance5 = balance5;
+        let beforeContractBalance = contractBalance;
+
+        let receipt = await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
+        let _OrderID = await getOrderID(MarketContract, currentBlock.number);
+
+        let createOrderGasSpent = await spentGasInEther(receipt); // accounts[5] потратил gas на транзакцию, в ether
+
+        // Проверки балансов после CreateOrder
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+
+        console.log("xxxxxxxx", typeof createOrderGasSpent, typeof beforeBalance5, typeof balance5);
+        let balance5WithGas = 0 + beforeBalance5;
+        assert.isOk(balance5WithGas == beforeBalance5, `a new balance for 5th-bayer account should be less ${beforeBalance5-balance5WithGas}. gas cost ${createOrderGasSpent}`);
+        assert.isOk(balance2 == beforeBalance2, `a new balance for 2th-owner account should be the same ${balance2} ${beforeBalance2}`);
+        assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less' + beforeContractBalance + contractBalance);
+
+        // Подтверждение заказа Покупателем
+        beforeBalance2 = balance2;
+        beforeBalance5 = balance5;
+        beforeContractBalance = contractBalance;
+
+        await MarketContract.approveOrder(_OrderID, true, {from: accounts[5]});
+
+        //--fixme-- нужно переписать обработку events на обработку типа ((await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: fromBlock}, function (error, result) {))
+        //await MarketContract.contract.getPastEvents(`eventApproveOrder`, {fromBlock: fromBlock},)
+        await MarketContract.contract.events.eventApproveOrder()//fixme !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            .on("data", (result) => {
+                console.log("cccc", result.args);
+            })
+            .on("error", (error) => {
+                console.log("cccc Panic!!!! approve", error);
+            });
+        assert.isOk(balance5 == beforeBalance5, 'a new balance for 5th-bayer account should be less:' +` diff Balance5 is = ${balance5-beforeBalance5}`);
+        assert.isOk(balance2 == beforeBalance2, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balance2 + ` BeforeBalance2 is = ` + beforeBalance2);
+        assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
+
+        // Проверки балансов после approveOrder Покупателя
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+//todo balance 2
+        assert.isOk(balance5 == beforeBalance5, 'a new balance for 5th-bayer account should be less:' +` Balance5 is = `+ balance5 +` beforeBalance5 is = `+ beforeBalance5);
+        assert.isOk(balance2 == beforeBalance2, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balance2 + ` BeforeBalance2 is = ` + beforeBalance2);//todo
+        assert.isOk(beforeContractBalance > contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
+
+        // Подтверждение заказа Продавцом
+        beforeBalance2 = balance2;
+        beforeBalance5 = balance5;
+        beforeContractBalance = contractBalance;
+        await MarketContract.approveOrder(_OrderID, true, {from: accounts[2]});
         await MarketContract.contract.events.eventApproveOrder()
             .on("data", (result) => {
                 console.log(result.args);
@@ -183,31 +235,13 @@ contract('MarketPlace', function (accounts) {
                 console.log("Panic!!!! approve", error);
             });
 
-        let beforeBalance2 = balance2;
-        let beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        // Проверки балансов после approveOrder Продавцом
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
 
-        let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
-
-        console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
-        console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
-
-        await MarketContract.approveOrder(_OrderID, true, {from: accounts[5]});
-        await MarketContract.approveOrder(_OrderID, true, {from: accounts[2]});
-
-        beforeBalance2 = balance2;
-        beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-
-
-        contractBalance = await Number(web3.eth.getBalance(MarketContract.address));
-
-        console.log("Balance after close order", "bayer", balance5, "owner", balance2);
-        console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
-        console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
-        console.log(`________________________________________________________________________`);
+        assert.isOk(balance5 < beforeBalance5, 'a new balance for 5th-bayer account should be less.' +` Balance5 is =`+ balance5 +`beforeBalance5 is =`+ beforeBalance5);
+        assert.isOk(balance2 > beforeBalance2, 'a new balance for 2th-owner account should be the same.' + ` Balance2 is =` + balance2 + ` BeforeBalance2 is =` + beforeBalance2);
+        assert.isOk(beforeContractBalance > contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
     });
 
     it('approveOrder test to err', async function () {
@@ -226,9 +260,9 @@ contract('MarketPlace', function (accounts) {
             });
 
         await sleep(1000);
-        let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
+        let balance5 = Number(await web3.eth.getBalance(accounts[5]));
 
-        let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        let balance2 = Number(await web3.eth.getBalance(accounts[2]));
 
         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
 
@@ -253,10 +287,10 @@ contract('MarketPlace', function (accounts) {
         await sleep(100);
         let beforeBalance2 = balance2;
         let beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
 
-        let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -269,8 +303,8 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
 
         contractBalance = await Number(web3.eth.getBalance(MarketContract.address));
 
@@ -294,8 +328,8 @@ contract('MarketPlace', function (accounts) {
             });
 
         await sleep(100);
-        let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);//bayer
-        let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);//owner
+        let balance5 = Number(await web3.eth.getBalance(accounts[5]));//bayer
+        let balance2 = Number(await web3.eth.getBalance(accounts[2]));//owner
 
         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
 
@@ -314,9 +348,9 @@ contract('MarketPlace', function (accounts) {
         await sleep(100);
         let beforeBalance2 = balance2;
         let beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -327,10 +361,10 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
 
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after close order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -341,7 +375,7 @@ contract('MarketPlace', function (accounts) {
         beforeBalance5 = balance5;
         balance5 = await Number(web3.eth.getBalance(accounts[5]));
         balance2 = await Number(web3.eth.getBalance(accounts[2]));
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after cansel order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -366,8 +400,8 @@ contract('MarketPlace', function (accounts) {
             });
 
         await sleep(100);
-        let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+        let balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        let balance2 = Number(await web3.eth.getBalance(accounts[2]));
         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
 
         await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
@@ -386,9 +420,9 @@ contract('MarketPlace', function (accounts) {
         await sleep(100);
         let beforeBalance2 = balance2;
         let beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -400,9 +434,9 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         // fixme проверить на NaN значения балансов
         console.log("Balance after close order", "bayer", balance5, "owner", balance2);
@@ -414,9 +448,9 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after cansel order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -442,8 +476,8 @@ contract('MarketPlace', function (accounts) {
             });
 
         await sleep(100);
-        let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);//bayer
-        let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);//ownet
+        let balance5 = Number(await web3.eth.getBalance(accounts[5]));//bayer
+        let balance2 = Number(await web3.eth.getBalance(accounts[2]));//ownet
         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
 
         await MarketContract.createOrder(3, {from: accounts[5], value: web3.utils.toWei('14', 'ether')});
@@ -461,9 +495,9 @@ contract('MarketPlace', function (accounts) {
         await sleep(100);
         let beforeBalance2 = balance2;
         let beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
 
@@ -473,9 +507,9 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after close order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -485,9 +519,9 @@ contract('MarketPlace', function (accounts) {
 
         beforeBalance2 = balance2;
         beforeBalance5 = balance5;
-        balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-        balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
-        let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+        balance5 = Number(await web3.eth.getBalance(accounts[5]));
+        balance2 = Number(await web3.eth.getBalance(accounts[2]));
+        let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 
         console.log("Balance after cansel order", "bayer", balance5, "owner", balance2);
         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -515,9 +549,9 @@ contract('MarketPlace', function (accounts) {
 //
 //         console.log(_OrderID, `+++++++++1`);  // fixme не видно _OrderID заставить ожидать
 //
-//         let balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
+//         let balance5 = Number(await web3.eth.getBalance(accounts[5]));
 //
-//         let balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//         let balance2 = Number(await web3.eth.getBalance(accounts[2]));
 //
 //         console.log("Balance before make order", "bayer", balance5, "owner", balance2);
 //
@@ -533,10 +567,10 @@ contract('MarketPlace', function (accounts) {
 //
 //         let beforeBalance2 = balance2;
 //         let beforeBalance5 = balance5;
-//         balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-//         balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//         balance5 = Number(await web3.eth.getBalance(accounts[5]));
+//         balance2 = Number(await web3.eth.getBalance(accounts[2]));
 //
-//         let contractBalance = web3.utils.fromWei(await web3.eth.getBalance(MarketContract.address),`ether`);
+//         let contractBalance = Number(await web3.eth.getBalance(MarketContract.address));
 //
 //         console.log("Balance after make order_", "bayer", balance5, "owner", balance2);
 //         console.log("Dif balanse:", "Bayer", balance5 - beforeBalance5, "Owner", balance2 - beforeBalance2, "contract", contractBalance);
@@ -546,8 +580,8 @@ contract('MarketPlace', function (accounts) {
 //
 //         beforeBalance2 = balance2;
 //         beforeBalance5 = balance5;
-//         balance5 = web3.utils.fromWei(await web3.eth.getBalance(accounts[5]),`ether`);
-//         balance2 = web3.utils.fromWei(await web3.eth.getBalance(accounts[2]),`ether`);
+//         balance5 = Number(await web3.eth.getBalance(accounts[5]));
+//         balance2 = Number(await web3.eth.getBalance(accounts[2]));
 //
 //
 //         contractBalance = await Number(web3.eth.getBalance(MarketContract.address));
@@ -595,4 +629,11 @@ async function expectException (promise, expectedError) {
     }
 
     expect.fail('Expected an exception but none was received');
+}
+
+async function spentGasInEther(receipt) {
+    const gasUsed = receipt.receipt.gasUsed;
+    const tx = await web3.eth.getTransaction(receipt.tx);
+    const gasPrice = tx.gasPrice;
+    return Number(gasPrice, `wei`) * gasUsed;
 }

@@ -1,0 +1,19 @@
+ let _OrderID = await getOrderID(MarketContract, currentBlock.number);
+
+
+async function getOrderID(MarketContract, fromBlock) {
+        let _OrderID;
+        await MarketContract.contract.getPastEvents(`EventCreateOrder`, {fromBlock: fromBlock}, function (error, result) {
+
+            if (error != null) {
+                // fixme падать
+                console.log("PANIC!!!!", error);
+            }
+            if (Object.keys(result).length === 0) {
+                console.log(`result.keys a empty`);
+            }
+
+            _OrderID = Number(result[0].returnValues._orderID);
+        });
+        return _OrderID;
+    }

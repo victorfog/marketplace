@@ -38,7 +38,8 @@
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
   </component>
   <component name="StructureViewFactory">
     <option name="ACTIVE_ACTIONS" value=",HIDE_INHERITED_FROM_OBJECT" />
@@ -55,30 +56,23 @@
       <screen x="0" y="23" width="1680" height="973" />
     </state>
     <state x="557" y="217" key="#JavaScript/0.23.1680.973@0.23.1680.973" timestamp="1591644325916" />
-    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1592644902455">
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1593257558690">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1592644902455" />
-    <state x="528" y="244" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1591799562179">
-      <screen x="0" y="23" width="1680" height="973" />
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1593257558690" />
+    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1594458963834">
+      <screen x="0" y="0" width="1680" height="1050" />
     </state>
+    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1594458963834" />
     <state x="528" y="244" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.1680.973@0.23.1680.973" timestamp="1591799562179" />
-    <state width="1638" height="249" key="GridCell.Tab.0.bottom" timestamp="1583249655578">
-      <screen x="0" y="23" width="1680" height="965" />
+    <state x="417" y="100" key="CommitChangelistDialog2" timestamp="1594459222869">
+      <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="249" key="GridCell.Tab.0.bottom/0.23.1680.965@0.23.1680.965" timestamp="1583249655578" />
-    <state width="1638" height="249" key="GridCell.Tab.0.center" timestamp="1583249655576">
-      <screen x="0" y="23" width="1680" height="965" />
+    <state x="417" y="100" key="CommitChangelistDialog2/0.0.1680.1050@0.0.1680.1050" timestamp="1594459222869" />
+    <state x="341" y="164" key="SettingsEditor" timestamp="1594462393951">
+      <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="249" key="GridCell.Tab.0.center/0.23.1680.965@0.23.1680.965" timestamp="1583249655576" />
-    <state width="1638" height="249" key="GridCell.Tab.0.left" timestamp="1583249655571">
-      <screen x="0" y="23" width="1680" height="965" />
-    </state>
-    <state width="1638" height="249" key="GridCell.Tab.0.left/0.23.1680.965@0.23.1680.965" timestamp="1583249655571" />
-    <state width="1638" height="249" key="GridCell.Tab.0.right" timestamp="1583249655577">
-      <screen x="0" y="23" width="1680" height="965" />
-    </state>
-    <state width="1638" height="249" key="GridCell.Tab.0.right/0.23.1680.965@0.23.1680.965" timestamp="1583249655577" />
+    <state x="341" y="164" key="SettingsEditor/0.0.1680.1050@0.0.1680.1050" timestamp="1594462393951" />
     <state x="505" y="227" width="670" height="730" key="search.everywhere.popup" timestamp="1593009309563">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
@@ -90,8 +84,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>265</line>
-          <properties lambdaOrdinal="-1" />
+          <line>299</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
