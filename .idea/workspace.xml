@@ -85,7 +85,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>323</line>
+          <line>327</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>

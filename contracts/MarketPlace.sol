@@ -1,6 +1,9 @@
 pragma solidity ^0.6.0;
 
-//pragma experimental ABIEncoderV2;
+//todo: при завершении сделки надо использовать списание средст их FIXPRISE и не забыть обнулить его !!!!!
+
+
+pragma experimental ABIEncoderV2;
 
 contract MarketPlace {
     constructor() public {}
@@ -391,8 +394,9 @@ contract MarketPlace {
         return (_sFile.Name, _sFile.Hash, _sFile.Price, _sFile.Description, _sFile.SellerID);
     }
 
-    function getOrderInFog(uint _orderID) public view returns (oneOrder){
-        return allOrders[_orderID];
+    function getOrderInFog(uint _orderID) public view returns (oneOrder memory){
+        oneOrder memory _order = allOrders[_orderID];
+        return _order;
     }
 
     // event eventGetProducts (uint _fileDB, string _textConsole);
