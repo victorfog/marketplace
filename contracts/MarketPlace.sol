@@ -91,6 +91,7 @@ contract MarketPlace {
     mapping(address => uint) arbitratorID;
     mapping(uint => disput) allDisput;
 
+    mapping(address => uint) deposits;
 
 
     //disput[] allDisput; //сюда будем заносить споры fixme: переделать на mapping uint - > disput ( где uint orderID )
@@ -149,12 +150,12 @@ contract MarketPlace {
         sFile memory BayFile = dbFiles[_FileID];
         require(dbFiles.length >= _FileID, "Файл с указанным ID не существует");
         require(BayFile.Price <= msg.value, "given money should be greater than the price");
-        allOrders.push(oneOrder(_FileID, msg.sender, false, false, BayFile.Price, false, statusDisput.empty));
+        allOrders.push(oneOrder(_FileID, msg.sender, false, false, msg.value, false, statusDisput.empty));
         uint _orderID = allOrders.length - 1;
         //0- статус спора; 0-ID спора
         ownerOrdersID[_orderID];
         bayersOrdersID[_orderID];
-        emit EventCreateOrder(_FileID, _orderID, BayFile.Price);
+        emit EventCreateOrder(_FileID, _orderID, msg.value);
     }
 
     event eventApproveOrder(bool _owner, bool bayer, string statusTransaktion);
@@ -388,6 +389,10 @@ contract MarketPlace {
         //        return(_name, _Hash, _Price, _Description, _SellerID);
         // emit eventGetFileInfo(_sFile.Name, _sFile.Hash, _sFile.SwarmHash, _sFile.Price, _sFile.Description, _sFile.SellerID, "!!!!!!!!!!!!!!");
         return (_sFile.Name, _sFile.Hash, _sFile.Price, _sFile.Description, _sFile.SellerID);
+    }
+
+    function getOrderInFog(uint _orderID) public view returns (oneOrder){
+        return allOrders[_orderID];
     }
 
     // event eventGetProducts (uint _fileDB, string _textConsole);

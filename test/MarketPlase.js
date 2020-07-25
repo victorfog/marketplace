@@ -186,7 +186,11 @@ contract('MarketPlace', function (accounts) {
         let beforeBalanceBuyer = balanceBuyer;
         let beforeContractBalance = contractBalance;
 
+        await MarketContract.getOrderInFog(_OrderID)
+
         let receipt = await MarketContract.createOrder(3, {from: accounts[buyerIndex], value: Number(web3.utils.toWei('14', 'ether'))});
+        // console.log(`XXXYYY2-afterCreateContract= contractBalance=${contractBalance},type=`, typeof contractBalance,
+        //     `__,beforecontractBalance=${beforeContractBalance},type=`, typeof beforecontractBalance);
         // todo: check for EventCreateOrder
         console.log("yyyyy TX createOrder", receipt);
 
@@ -199,7 +203,7 @@ contract('MarketPlace', function (accounts) {
         balanceOwner = Number(await web3.eth.getBalance(accounts[ownerIndex]));
 
         let balanceBuyerWithGas = createOrderGasSpent + balanceBuyer + Number(web3.utils.toWei('14', 'ether'));
-        console.log("xxxxxxxx", typeof balanceBuyerWithGas, "=", typeof createOrderGasSpent, typeof balanceBuyer, typeof web3.utils.toWei('14', 'ether'));
+        //console.log("xxxxxxxx", typeof balanceBuyerWithGas, "=", typeof createOrderGasSpent, typeof balanceBuyer, typeof web3.utils.toWei('14', 'ether'));
         assert.isOk(balanceBuyerWithGas == beforeBalanceBuyer, `a new balance for 5th-bayer account should be less ${balanceBuyerWithGas - beforeBalanceBuyer}. gas cost ${createOrderGasSpent}`);
         assert.isOk(balanceOwner == beforeBalanceOwner, `a new balance for 2th-owner account should be the same ${balanceOwner} ${beforeBalanceOwner}`);
         assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less' + beforeContractBalance + contractBalance);
