@@ -243,8 +243,8 @@ contract('MarketPlace', function (accounts) {
         const balanceBuyer3 = Number(await web3.eth.getBalance(accounts[buyerIndex]));
         const balanceOwner3 = Number(await web3.eth.getBalance(accounts[ownerIndex]));
 //todo balance 2
-        assert.isOk(balanceBuyer+approveOrderGasSpent == beforeBalanceBuyer, 'a new balance for 5th-bayer account should be less:' +` Balance5 is = `+ balanceBuyer +` beforeBalance5 is = `+ beforeBalanceBuyer + " got difference " + (beforeBalanceBuyer+approveOrderGasSpent-balanceBuyer));
-        assert.isOk(balanceOwner == beforeBalanceOwner, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balanceOwner + ` BeforeBalance2 is = ` + beforeBalanceOwner);//todo
+        assert.isOk(balanceBuyer3+approveOrderGasSpent == beforeBalanceBuyer, 'a new balance for 5th-bayer account should be ==:' +` Balance5 is = `+ (balanceBuyer3+approveOrderGasSpent) +` beforeBalance5 is = `+ beforeBalanceBuyer + " got difference " + (beforeBalanceBuyer-approveOrderGasSpent-balanceBuyer3));
+        assert.isOk(balanceOwner3 == beforeBalanceOwner, 'a new balance for 2th-owner account should be the same:' + ` Balance2 is = ` + balanceOwner3 + ` BeforeBalance2 is = ` + beforeBalanceOwner);//todo
         assert.isOk(beforeContractBalance == contractBalance, 'a new balance for ContractBalance account should be less: ' + `ContractBalance is = ` + contractBalance + `, BeforeContractBalance is = ` + beforeContractBalance);
 
         // Подтверждение заказа Продавцом

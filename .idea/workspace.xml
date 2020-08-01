@@ -4,8 +4,6 @@
     <list default="true" id="76bb7bab-5ea9-464d-be10-06e8b02d6057" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../week6/Ticket/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/MarketPlace.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/MarketPlace.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/MarketPlase.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/MarketPlase.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../marketplace_s/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,14 +55,14 @@
       <screen x="0" y="23" width="1680" height="973" />
     </state>
     <state x="557" y="217" key="#JavaScript/0.23.1680.973@0.23.1680.973" timestamp="1591644325916" />
-    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1593257558690">
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1595676236764">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1593257558690" />
-    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1594458963834">
+    <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1595676236764" />
+    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1596271224710">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1594458963834" />
+    <state x="528" y="238" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1596271224710" />
     <state x="528" y="244" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.1680.973@0.23.1680.973" timestamp="1591799562179" />
     <state x="417" y="100" key="CommitChangelistDialog2" timestamp="1594459222869">
       <screen x="0" y="0" width="1680" height="1050" />
@@ -85,7 +83,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/test/MarketPlase.js</url>
-          <line>327</line>
+          <line>330</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
